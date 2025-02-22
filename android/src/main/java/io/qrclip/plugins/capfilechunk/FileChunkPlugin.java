@@ -1,5 +1,7 @@
 package io.qrclip.plugins.capfilechunk;
 
+import android.content.ContentResolver;
+import android.net.Uri;
 import android.util.Log;
 
 import com.getcapacitor.JSObject;
@@ -8,7 +10,9 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.Base64;
 import java.util.Random;
@@ -84,17 +88,35 @@ public class FileChunkPlugin extends Plugin {
         Integer tLength = call.getInt("length", 0);
         JSObject tResponse = new JSObject();
 
-        byte[] tBuffer = new byte[tLength];
-        try (RandomAccessFile tRandomAccessFile = new RandomAccessFile(tPath, "r")) {
-            tRandomAccessFile.seek(tOffset); // MOVE TO OFFSET
-            tRandomAccessFile.read(tBuffer, 0, tLength);
-            tResponse.put("data",android.util.Base64.encodeToString(tBuffer, android.util.Base64.NO_WRAP));
-            call.resolve(tResponse);
-        } catch (IOException e) {
-            tResponse.put("data", "");
-            call.resolve(tResponse);
+        if (tPath.startsWith("content://")) {
+            // support content-URIs, e.g. URIs originating from letting the user pick a file
+            // https://developer.android.com/training/data-storage/shared/media#open-file-stream
+            ContentResolver resolver = getActivity().getApplicationContext()
+                    .getContentResolver();
+            try (InputStream stream = resolver.openInputStream(Uri.parse(tPath))) {
+                byte[] tBuffer = new byte[tLength];
+                if (tOffset > 0) {
+                    stream.skip(tOffset);
+                }
+                stream.read(tBuffer, 0, tLength);
+                tResponse.put("data", android.util.Base64.encodeToString(tBuffer, android.util.Base64.NO_WRAP));
+                call.resolve(tResponse);
+            } catch (IOException e) {
+                Log.e(getLogTag(), "Could not read file: " + e.toString(), e);
+                call.reject("Could not read file: " + e.toString());
+            }
+        } else {
+            try (RandomAccessFile tRandomAccessFile = new RandomAccessFile(tPath, "r")) {
+                byte[] tBuffer = new byte[tLength];
+                tRandomAccessFile.seek(tOffset); // MOVE TO OFFSET
+                tRandomAccessFile.read(tBuffer, 0, tLength);
+                tResponse.put("data", android.util.Base64.encodeToString(tBuffer, android.util.Base64.NO_WRAP));
+                call.resolve(tResponse);
+            } catch (IOException e) {
+                Log.e(getLogTag(), "Could not read file: " + e.toString(), e);
+                call.reject("Could not read file: " + e.toString());
+            }
         }
-
     }
 
     ////////////////////////////////////////////////////////////////

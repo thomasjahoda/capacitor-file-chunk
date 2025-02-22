@@ -57,6 +57,7 @@ public class FileChunkProcessor {
     ///////////////////////////////////////////////////////////////
     // ENCRYPT BUFFER
     public byte[] getFileChunk( String tFilePath, int tOffset, int tSize) {
+        // TODO also support content-URIs, e.g. URIs originating from letting the user pick a file. But must be able to properly send URI via request, currently file paths are limited to being encoded in the URL, which just seems unnecessary. Just introduce query parameter but be backwards compatible.
         byte[] tBuffer = new byte[tSize];
         try (RandomAccessFile tRandomAccessFile = new RandomAccessFile(tFilePath, "r")) {
             tRandomAccessFile.seek(tOffset); // MOVE TO OFFSET

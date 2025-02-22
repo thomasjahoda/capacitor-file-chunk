@@ -15,7 +15,7 @@ public class FileChunkServer extends NanoHTTPD {
 
     ///////////////////////////////////////////////////////////////
     // CONSTRUCTOR
-    public FileChunkServer(int tPort, int tMaxSize){
+    public FileChunkServer(int tPort, int tMaxSize) {
         super(tPort);
         this.mMaxSize = tMaxSize;
     }
@@ -74,13 +74,13 @@ public class FileChunkServer extends NanoHTTPD {
         }
 
         // IF BIGGER THEN ALLOWED
-        if(tContentLength > mMaxSize){
+        if (tContentLength > mMaxSize) {
             return newCORSResponse(Response.Status.BAD_REQUEST, tSession);
         }
 
         try {
             boolean tOK = this.mFileChunkProcessor.appendToFile(tSession, tContentLength);
-            if(!tOK){
+            if (!tOK) {
                 return newCORSResponse(Response.Status.BAD_REQUEST, tSession);
             }
             // 204 response
@@ -100,7 +100,7 @@ public class FileChunkServer extends NanoHTTPD {
         int tSize;
         List<String> tOffsetParam = tSession.getParameters().get("o");
         List<String> tSizeParam = tSession.getParameters().get("l");
-        if(tOffsetParam != null && tOffsetParam.size() == 1 && tSizeParam != null &&  tSizeParam.size() == 1){
+        if (tOffsetParam != null && tOffsetParam.size() == 1 && tSizeParam != null && tSizeParam.size() == 1) {
             tOffset = Integer.parseInt(tOffsetParam.get(0));
             tSize = Integer.parseInt(tSizeParam.get(0));
         } else {
@@ -110,12 +110,12 @@ public class FileChunkServer extends NanoHTTPD {
         try {
             // READ THE FILE CHUNK
             byte[] tBuffer = this.mFileChunkProcessor.getFileChunk(tFilePath, tOffset, tSize);
-            if(tBuffer.length == 0){
+            if (tBuffer.length == 0) {
                 return newCORSResponse(Response.Status.BAD_REQUEST, tSession);
             }
 
             Response tResponse;
-            tResponse = newFixedLengthResponse(Response.Status.OK, "application/octet-stream",  new ByteArrayInputStream(tBuffer), tBuffer.length);
+            tResponse = newFixedLengthResponse(Response.Status.OK, "application/octet-stream", new ByteArrayInputStream(tBuffer), tBuffer.length);
 
             // SET THE RESPONSE HEADERS
             addOriginHeaders(tResponse, tSession);
