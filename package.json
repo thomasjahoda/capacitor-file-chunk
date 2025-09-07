@@ -1,6 +1,6 @@
 {
   "name": "@thomasjahoda-forks/capacitor-file-chunk",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Capacitor plugin to read and write files in chunks using a local server and without using capacitor bridge.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -11,7 +11,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "CapacitorFileChunk.podspec"
+    "ThomasjahodaForksCapacitorFileChunk.podspec"
   ],
   "author": "QRClip",
   "homepage": "https://www.qrclip.io/",
